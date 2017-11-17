@@ -1,5 +1,5 @@
 """A class of weather report."""
-from Weather import Weather
+from Weather import Weather, TODAY
 
 
 class WeatherMessage:
@@ -10,22 +10,22 @@ class WeatherMessage:
         self.weather = Weather(cityName, coutnryCode, unit)	
 
 
-    def getHighTempAndTime(self, weather_list):
+    def getHighTempAndTime(self):
         """ Gets the highest temperature among the WEATHER_LIST
         """
-        return self.weather.getDayMaxTempAndTime(Weather.TODAY)
+        return self.weather.getDayMaxTempAndTime(TODAY)
 
 
-    def getLowTempAndTime(self, weather_list):
+    def getLowTempAndTime(self):
         """ Gets the lowest temperature among the WEATHER_LIST
         """
-        return self.weather.getDayMinTempAndTime(Weather.TODAY)
+        return self.weather.getDayMinTempAndTime(TODAY)
 
-    def getRainAndTime(self, weather_list):
+    def getRainAndTime(self):
         """ Returns a list of tuple with rain status as keys and
             and raining time as values for the WEATHER_LIST
         """
-        return self.weather.getDayRainDesAndTime(Weather.TODAY)
+        return self.weather.getDayRainDesAndTime(TODAY)
 
 
 
@@ -34,12 +34,12 @@ class WeatherMessage:
         """
         msg = "\nToday, the high will be %sF around " \
               "%s and the low will be %sF around %s.\n" \
-              % (self.high_temp, self.high_temp_time, \
-               self.low_temp, self.low_temp_time)
-        if not self.getRainAndTime:
+              % (self.getHighTempAndTime()[0], self.getHighTempAndTime()[1],\
+                self.getLowTempAndTime()[0], self.getLowTempAndTime()[1])
+        if not self.getRainAndTime():
             msg += "No rain today!"
         else:
-            for rainAndTimeTuple in self.getRainAndTime:
+            for rainAndTimeTuple in self.getRainAndTime():
                 msg += "There will be %s, at around %s." % (rainAndTimeTuple[0],\
                  rainAndTimeTuple[1])
         return msg

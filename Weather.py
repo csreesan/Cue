@@ -14,7 +14,7 @@ DAY_4 = 'day4'
 DAY_5 = 'day5'
 
 # Weather list index
-TODAY_END = 5
+TODAY_END = 4
 DAY_LIST_NUM = 8
 DAY_2_END = TODAY_END + DAY_LIST_NUM
 DAY_3_END = DAY_2_END + DAY_LIST_NUM
@@ -51,6 +51,7 @@ class Weather:
 
         self.forecastReader = JsonForecastReader(cityName, countryCode, unit)
         self.weatherList = self.forecastReader.getWeatherList()
+        self.daysDict = self.getDaysDict()
 
 
     def getDaysDict(self):
@@ -65,26 +66,35 @@ class Weather:
         return daysDict
 
 
-    def getDayMaxTempAndTime(self, day):
+    def getDayFromString(self, dayString):
+        return self.daysDict[dayString]
 
+
+    def getDayMaxTempAndTime(self, dayString):
+        day = self.getDayFromString(dayString)
         return day.getMaxTempAndTime()
 
 
-    def getDayMinTempAndTime(self, day):
+    def getDayMinTempAndTime(self, dayString):
+        day = self.getDayFromString(dayString)
         return day.getMinTempAndTime()
 
 
-    def getDayRainDesAndTime(self, day):
-        return day.getRainDesAndTime()
+    def getDayRainDesAndTime(self, dayString):
+        day = self.getDayFromString(dayString)
+        return day.getRainDesAndTimeTupleList()
 
-    def getSpecificWeatherDes(self, day, time):
-        return day.getTimesObject(time).getWeatherDes()
+    def getSpecificWeatherDes(self, dayString, timeString):
+        day = self.getDayFromString(dayString)
+        return day.getTimeObject(timeString).getWeatherDes()
 
     def getSpecificMaxTemp(self, day, time):
-        return day.getTimesObject(time).getMaxTemp()
+        day = self.getDayFromString(dayString)
+        return day.getTimeObject(timeString).getMaxTemp()
 
-    def getSpecificMinTemp(self, day, time):
-        return day.getTimesObject(time).getMinTemp()
+    def getSpecificMinTemp(self, dayString, time):
+        day = self.getDayFromString(dayString)
+        return day.getTimeObject(timeString).getMinTemp()
 
 
 
@@ -122,7 +132,7 @@ class Day:
         maxTemp = INIT_MAX_TEMP
         maxTempTime = None
         for time in self.timesDict.keys():
-            temp = self.getTimesObject(time).getTemp()
+            temp = self.getTimeObject(time).getTemp()
             if temp >= maxTemp:
                 maxTemp = temp
                 maxTempTime = time
@@ -134,7 +144,7 @@ class Day:
         minTemp = INIT_MIN_TEMP
         minTempTime = None
         for time in self.timesDict.keys():
-            temp = self.getTimesObject(time).getTemp()
+            temp = self.getTimeObject(time).getTemp()
             if temp <= minTemp:
                 minTemp = temp
                 minTempTime = time
@@ -144,7 +154,7 @@ class Day:
     def getRainDesAndTimeTupleList(self):
         lst = []
         for time in self.timesDict.keys():
-            weatherDes = self.getTimesObject(time).getWeatherDes()
+            weatherDes = self.getTimeObject(time).getWeatherDes()
             if "rain" in weatherDes:
                 lst.append((weatherDes, time))
         return lst
@@ -175,5 +185,5 @@ class Time:
         return self.timeDataDict.get(MAIN_TEMP_KEY).get(MIN_TEMP_KEY)
 
     def getWeatherDes(self):
-        return self.timeDataDict.get(WEATHER_KEY).get(WEATHER_DESCRIPTION_KEY)
+        return self.timeDataDict.get(WEATHER_KEY)[0].get(WEATHER_DESCRIPTION_KEY)
 

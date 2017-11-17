@@ -18,12 +18,13 @@ class cue:
         self.mailer.starttls()
         self.mailer.login('cue.me.today@gmail.com', 'okay12345')
 
-        self.name = user.name
-        self.subject = "Your upcoming day, %s!" % user.name
+        self.user = user
+        self.name = self.user.name
+        self.subject = "Your upcoming day, %s!" % self.user.name
         self.msg = MIMEMultipart('alternative')
-        self.msg['Subject'] = "Your upcoming day, %s!" % user.name
+        self.msg['Subject'] = "Your upcoming day, %s!" % self.user.name
         self.msg['From'] = self.msg['To'] = user.email
-        self.WeatherMessage(user.cityName, user.countryCode, user.unit)
+        self.weatherMessage = WeatherMessage(user.cityName, user.countryCode, user.unit)
 
         # self.msg = "Dear %s," % name
         self.feats = user.feats
@@ -104,7 +105,7 @@ class cue:
                 </table>
             </body>
         </html>
-        """ % (WeatherMessage(self.name).compose(), user.reminders.compose())
+        """ % (self.weatherMessage.compose(), self.user.reminders.compose())
         print(html)
 
         part1 = MIMEText(text, 'plain')
@@ -130,7 +131,7 @@ class cue:
         """
         print('sent')
         self.mailer.sendmail('cue.me.today@gmail.com',
-                             self.CONTACT_DICT[self.name],
+                             CONTACT_DICT[self.name],
                              self.msg.as_string())
 
 
@@ -139,8 +140,8 @@ def main():
     """ Read the correct profile.
     """
     jason = User('Jason', ['task'], 'cue.me.today@gmail.com', ['Berkeley', 'us'], 'jason')
-    q = cue('Jason', ['task'])
+    q = cue(jason)
     q.mail();
 
-
-main()
+if __name__=='__main__':
+  main()

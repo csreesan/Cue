@@ -25,8 +25,7 @@ class JsonForecastReader:
 
 
 	def getDataDict(self):
-		apiUrl = "http://api.openweathermap.org/data/2.5/forecast?\
-		q={},{}&mode=JSON&units={}&APPID={}".format(self.cityName,\
+		apiUrl = "http://api.openweathermap.org/data/2.5/forecast?q={},{}&mode=JSON&units={}&APPID={}".format(self.cityName,\
 					 self.countryCode, self.unit, API_KEY)
 		with urllib.request.urlopen(apiUrl) as response:
 			jsonData = response.read().decode('utf-8')
