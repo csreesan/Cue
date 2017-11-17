@@ -1,73 +1,179 @@
-"""A class of weather report."""
-import pyowm
+from ForecastReader import JsonForecastReader
+from collections import OrderedDict
 
 
 
 
-class Weather: #implemented class
-    """ Class that gives the weather report.
+##################################################
+# Static Variables
+#Day keys
+TODAY = 'today'
+DAY_2 = 'day2'
+DAY_3 = 'day3'
+DAY_4 = 'day4'
+DAY_5 = 'day5'
+
+#Weather list index
+TODAY_END = 5
+DAY_LIST_NUM = 8
+DAY_2_END = TODAY_END + DAY_LIST_NUM
+DAY_3_END = DAY_2_END + DAY_LIST_NUM
+DAY_4_END = DAY_3_END + DAY_LIST_NUM
+DAY_5_END = DAY_4_END + DAY_LIST_NUM
+
+# Weather list keys
+DATE_TIME_KEY = 'dt_txt'
+WEATHER_KEY = 'weather'
+RAIN_KEY = 'rain'
+MAIN_TEMP_KEY = 'main'
+
+# All keys for specific temperatures
+TEMP_KEY = 'temp'
+MAX_TEMP_KEY = 'temp_max'
+MIN_TEMP_KEY = 'temp_min'
+
+# Weather dict key
+WEATHER_DESCRIPTION_KEY = 'description'
+
+# Initial Min and Max Temp
+INIT_MIN_TEMP = 99999
+INIT_MAX_TEMP = -99999
+
+
+#####################################################
+# Class Definitions
+
+class Weather:
+    """ Class representing weather objects
     """
 
-    def __init__(self, name):
-        owm = pyowm.OWM('c56ba86f15e44e73a6e50e64c99b06df')
-        self.three_hours_forecast = owm.three_hours_forecast("Berkeley,us")
-        self.forecast = self.three_hours_forecast.get_forecast();
-        self.today_weather_list = self.forecast.get_weathers()[:8]
-        self.high_temp, self.high_temp_time = self.get_high_temp(self.today_weather_list)
-        self.low_temp, self.low_temp_time = self.get_low_temp(self.today_weather_list)
-        self.rain_dict = self.get_rain(self.today_weather_list)
-        self.compose()    	
+    def __init__(self, cityName, coutnryCode="us", unit="imperial"):
+
+        self.forecastReader = JsonForecastReader(cityName, countryCode, unit)
+        self.weatherList = self.forecastReader.getWeatherList()
 
 
-    def get_high_temp(self, weather_list):
-        """ Gets the highest temperature among the WEATHER_LIST
+    def getDaysDict(self):
+        """ get days dict
         """
-        max_temp = 0
-        for weather in weather_list:
-            temp = weather.get_temperature('fahrenheit')["temp_max"]
-            if temp >= max_temp:
-                max_temp = temp
-                time = weather.get_reference_time('iso')[11:-3]
+        daysDict = OrderedDict()
+        daysDict[TODAY] = Day(self.weatherList[:TODAY_END])
+        daysDict[DAY_2] = Day(self.weatherList[TODAY_END:DAY_2_END])
+        daysDict[DAY_3] = Day(self.weatherList[DAY_2_END:DAY_3_END])
+        daysDict[DAY_4] = Day(self.weatherList[DAY_3_END:DAY_4_END])
+        daysDict[DAY_5] = Day(self.weatherList[DAY_4_END:DAY_5_END])
+        return daysDict
 
-        return max_temp, time
 
-    def get_low_temp(self, weather_list):
-        """ Gets the lowest temperature among the WEATHER_LIST
-        """
-        min_temp = 999999
-        for weather in weather_list:
-            temp = weather.get_temperature('fahrenheit')["temp_min"]
-            if temp <= min_temp:
-                min_temp = temp
-                time = weather.get_reference_time('iso')[11:-3]
+    def getDayMaxTempAndTime(self, day):
 
-        return min_temp, time
+        return day.getMaxTempAndTime()
 
-    def get_rain(self, weather_list):
-        """ Returns a dictionary with rain status as keys and
-            and raining time as values for the WEATHER_LIST
-        """
-        rain_dict = {}
-        for weather in weather_list:
-            if "rain" in weather.get_detailed_status():
-                status = weather.get_detailed_status()
-                time = weather.get_reference_time('iso')[11:-3]
-                rain_dict[status] = time
 
-        return rain_dict
+    def getDayMinTempAndTime(self, day):
+        return day.getMinTempAndTime()
+
+
+    def getDayRainDesAndTime(self, day):
+        return day.getRainDesAndTime()
+
+    def getSpecificWeatherDes(self, day, time):
+        return day.getTimesObject(time).getWeatherDes()
+
+    def getSpecificMaxTemp(self, day, time):
+        return day.getTimesObject(time).getMaxTemp()
+
+    def getSpecificMinTemp(self, day, time):
+        return day.getTimesObject(time).getMinTemp()
 
 
 
-    def compose(self): #fixme --> includes 5 days
-        """ Composing a message to be sent to email.
-        """
-        msg = "\nToday, the high will be %sF around " \
-              "%s and the low will be %sF around %s.\n" \
-              % (self.high_temp, self.high_temp_time, \
-               self.low_temp, self.low_temp_time)
-        if not self.rain_dict:
-            msg += "No rain today!"
-        else:
-            for item in self.rain_dict.items():
-                msg += "There will be %s, at around %s." % (item[0], item[1])
-        return msg
+class Day:
+    """ Class represeting the Day
+    """
+
+    def __init__(self, dayDataList):
+        self.date = self.getDataDate(dayDataList[0])
+        self.dayDataList = dayDataList
+        self.timesDict = getTimesDict()
+
+    def getDate(self):
+        return self.date
+
+
+    def getTimeObject(self, time):
+        return self.timesDict[time]
+
+
+    def getDataDate(self, dataDict):
+        return dataDict.get(DATE_TIME_KEY)[0:10]
+
+    def getDataTime(self, dataDict):
+        return dataDict.get(DATE_TIME_KEY)[11:]
+
+    def getTimesDict(self):
+        timesDict = OrderedDict()
+        for timeDataDict in dayDataList:
+            assert getDataDate(timeDataDict) == self.date, "Can't have different dates yo!"
+            timesDict[getDataTime(timeDataDict)] = Time()
+        return timesDict
+
+    def getMaxTempAndTime(self):
+        maxTemp = INIT_MAX_TEMP
+        maxTempTime = None
+        for time in timesDict.keys():
+            temp = getTimesObject(time).getTemp()
+            if temp >= maxTemp:
+                maxTemp = temp
+                maxTempTime = time
+
+        return maxTemp, maxTempTime
+
+
+    def getMinTempAndTime(self):
+        minTemp = INIT_MIN_TEMP
+        minTempTime = None
+        for time in timesDict.keys():
+            temp = getTimesObject(time).getTemp()
+            if temp <= minTemp:
+                minTemp = temp
+                minTempTime = time
+
+        return minTemp, minTempTime
+
+    def getRainDesAndTimeTupleList(self):
+        lst = []
+        for time in timesDict.keys():
+            weatherDes = getTimesObject(time).getWeatherDes()
+            if "rain" is in weatherDes:
+                lst.append(weatherDes, time)
+        return lst
+
+
+
+
+class Time:
+    """ Class
+    """
+    def __init__(self, timeDataDict):
+        self.timeDataDict = timeDataDict
+        self.time = getDataTime
+
+    def getTime(self):
+        return self.time
+
+    def getDataTime(self):
+        return self.timeDataDict.get(DATE_TIME_KEY)[11:]
+
+    def getTemp(self):
+        return self.timeDataDict.get(MAIN_TEMP_KEY).get(TEMP_KEY)
+
+    def getMaxTemp(self):
+        return self.timeDataDict.get(MAIN_TEMP_KEY).get(MAX_TEMP_KEY)
+
+    def getMinTemp(self):
+        return self.timeDataDict.get(MAIN_TEMP_KEY).get(MIN_TEMP_KEY)
+
+    def getWeatherDes(self):
+        return self.timeDataDict.get(WEATHER_KEY).get(WEATHER_DESCRIPTION_KEY)
+

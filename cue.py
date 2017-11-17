@@ -1,30 +1,32 @@
 import smtplib
-from Weather import Weather
-import openpyxl
+from WeatherMessage import WeatherMessage
+from Reminders import Reminders
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from User import User
 
+CONTACT_DICT = dict(Jason='cue.me.today@gmail.com')
 
 class cue:
     """ Actual cuer and takes in a list
         of desired items in email/
     """
-    contact = dict(Jason='cue.me.today@gmail.com')
 
-    def __init__(self, name, feats):
+    def __init__(self, user):
         self.mailer = smtplib.SMTP('smtp.gmail.com', 587)
         self.mailer.ehlo()
         self.mailer.starttls()
         self.mailer.login('cue.me.today@gmail.com', 'okay12345')
 
-        self.name = name
-        self.subject = "Your upcoming day, %s!" % name
+        self.name = user.name
+        self.subject = "Your upcoming day, %s!" % user.name
         self.msg = MIMEMultipart('alternative')
-        self.msg['Subject'] = "Your upcoming day, %s!" % name
-        self.msg['From'] = self.msg['To'] = 'cue.me.today@gmail.com'
+        self.msg['Subject'] = "Your upcoming day, %s!" % user.name
+        self.msg['From'] = self.msg['To'] = user.email
+        self.WeatherMessage(user.cityName, user.countryCode, user.unit)
 
         # self.msg = "Dear %s," % name
-        self.feats = feats
+        self.feats = user.feats
 
         self.composer()
 
@@ -102,7 +104,7 @@ class cue:
                 </table>
             </body>
         </html>
-        """ % (Weather(self.name).compose(), reminders(self.name).compose())
+        """ % (WeatherMessage(self.name).compose(), user.reminders.compose())
         print(html)
 
         part1 = MIMEText(text, 'plain')
@@ -128,34 +130,15 @@ class cue:
         """
         print('sent')
         self.mailer.sendmail('cue.me.today@gmail.com',
-                             self.contact[self.name],
+                             self.CONTACT_DICT[self.name],
                              self.msg.as_string())
 
 
-class reminders:  # should move to abstract
-    """ Reads from excel of tasks.
-    """
-
-    def __init__(self, name):
-        self.wb = openpyxl.load_workbook('%s.xlsx' % name)
-        self.sheet = self.wb.get_sheet_by_name('Sheet1')
-        self.compose()
-
-    def compose(self):
-        msg = ''
-        i = 2
-        task = self.sheet.cell(row=i, column=1).value
-        while task != None:  # due date should be adjusted in this
-            due = self.sheet.cell(row=i, column=2).value
-            msg += "%s due on %s<br>" % (task, due)
-            i += 1
-            task = self.sheet.cell(row=i, column=1).value
-        msg = "Today you have %d things to do:<br>" % (i - 2) + msg
-        return msg
 
 def main():
     """ Read the correct profile.
     """
+    jason = User('Jason', ['task'], 'cue.me.today@gmail.com', ['Berkeley', 'us'], 'jason')
     q = cue('Jason', ['task'])
     q.mail();
 
