@@ -1,14 +1,15 @@
 import smtplib
-from Weather import Weather
+import pyowm
 import openpyxl
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+
 
 class cue:
     """ Actual cuer and takes in a list
         of desired items in email/
     """
-    contact = dict(Jason = 'cue.me.today@gmail.com')
+    contact = dict(Jason='cue.me.today@gmail.com')
 
     def __init__(self, name, feats):
         self.mailer = smtplib.SMTP('smtp.gmail.com', 587)
@@ -22,7 +23,7 @@ class cue:
         self.msg['Subject'] = "Your upcoming day, %s!" % name
         self.msg['From'] = self.msg['To'] = 'cue.me.today@gmail.com'
 
-        #self.msg = "Dear %s," % name
+        # self.msg = "Dear %s," % name
         self.feats = feats
 
         self.composer()
@@ -40,16 +41,16 @@ class cue:
           <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro" rel="stylesheet">
           </head>
           <style>
-          
+
           h1 {
             font-family: 'Source Sans Pro', sans-serif;
           }
-        
+
           p {
             font-family: 'Source Sans Pro', sans-serif;
           }
-        
-        
+
+
           </style>
             <body style="margin: 0; padding: 0;">
                 <table align="center" border="1" bordercolor=BLACK cellpadding="50" cellspacing="0" width="600">
@@ -70,6 +71,7 @@ class cue:
                      <tr>
                       <td>
                        %s
+                       <iframe src="https://calendar.google.com/calendar/embed?src=cue.me.today%%40gmail.com&ctz=America%%2FLos_Angeles" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>             </tr>
                       </td>
                      </tr>
                      <tr>
@@ -100,7 +102,7 @@ class cue:
                 </table>
             </body>
         </html>
-        """ % (Weather(self.name).compose(), reminders(self.name).compose())
+        """ % (weather(self.name).compose(), reminders(self.name).compose())
         print(html)
 
         part1 = MIMEText(text, 'plain')
@@ -114,6 +116,7 @@ class cue:
         if 'task' in self.feats:
             self.msg += task(self.name).compose()
         """
+
     def mail(self):
         """ Sends the daily email notifiation
             with wanted features.
@@ -129,8 +132,7 @@ class cue:
                              self.msg.as_string())
 
 
-
-class reminders: #should move to abstract
+class reminders:  # should move to abstract
     """ Reads from excel of tasks.
     """
 
@@ -142,8 +144,8 @@ class reminders: #should move to abstract
     def compose(self):
         msg = ''
         i = 2
-        task = self.sheet.cell(row = i, column = 1).value
-        while task != None: #due date should be adjusted in this
+        task = self.sheet.cell(row=i, column=1).value
+        while task != None:  # due date should be adjusted in this
             due = self.sheet.cell(row=i, column=2).value
             msg += "%s due on %s<br>" % (task, due)
             i += 1
@@ -152,10 +154,40 @@ class reminders: #should move to abstract
         return msg
 
 
+class weather:  # implemented class
+    """ Gives weather.
+    """
+
+    def __init__(self, name):
+        owm = pyowm.OWM('c56ba86f15e44e73a6e50e64c99b06df')
+        self.fc = owm.three_hours_forecast("Berkeley,us")
+        f = self.fc.get_forecast();
+        self.lst = f.get_weathers()[0:6]
+
+        # fixme this is doing for all five days
+        self.hot = self.fc.most_hot().get_temperature('fahrenheit')['temp']
+        self.ht = self.fc.most_hot().get_reference_time(timeformat='iso')
+
+        self.cold = self.fc.most_cold().get_temperature('fahrenheit')['temp']
+        self.ct = self.fc.most_cold().get_reference_time(timeformat='iso')
+
+        self.compose()
+
+    def compose(self):  # fixme --> includes 5 days
+        msg = "Today, the high will be %sF around " \
+              "%s and the low will be %sF around %s.<br>" \
+              % (self.hot, self.ht, self.cold, self.ct)
+        if self.fc.will_have_rain():
+            r = self.fc.when_rain()[0];
+            msg += "It will also rain today around %s. Bring an umbrella!<br>" % r.get_reference_time(timeformat='iso')
+        return msg
+
+
 def main():
     """ Read the correct profile.
     """
     q = cue('Jason', ['task'])
     q.mail();
+
 
 main()
