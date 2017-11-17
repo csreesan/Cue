@@ -8,7 +8,8 @@ class Reminders:
 
     def __init__(self, name, sheetName):
     	self.name = name
-        self.wb = openpyxl.load_workbook('%s.xlsx' % self.name)
+        self.sheetName = sheetName
+        self.wb = openpyxl.load_workbook('%s.xlsx' % self.sheetName)
         self.sheet = self.wb.get_sheet_by_name('Sheet1')
         self.compose()
 
