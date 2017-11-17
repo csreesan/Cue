@@ -1,5 +1,5 @@
 import smtplib
-import pyowm
+from Weather import Weather
 import openpyxl
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -102,7 +102,7 @@ class cue:
                 </table>
             </body>
         </html>
-        """ % (weather(self.name).compose(), reminders(self.name).compose())
+        """ % (Weather(self.name).compose(), reminders(self.name).compose())
         print(html)
 
         part1 = MIMEText(text, 'plain')
