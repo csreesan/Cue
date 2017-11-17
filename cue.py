@@ -1,5 +1,5 @@
 import smtplib
-import pyowm
+from Weather import Weather
 import openpyxl
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -100,7 +100,7 @@ class cue:
                 </table>
             </body>
         </html>
-        """ % (weather(self.name).compose(), reminders(self.name).compose())
+        """ % (Weather(self.name).compose(), reminders(self.name).compose())
         print(html)
 
         part1 = MIMEText(text, 'plain')
@@ -149,35 +149,6 @@ class reminders: #should move to abstract
             i += 1
             task = self.sheet.cell(row=i, column=1).value
         msg = "Today you have %d things to do:<br>" % (i - 2) + msg
-        return msg
-
-
-class weather: #implemented class
-    """ Gives weather.
-    """
-
-    def __init__(self, name):
-        owm = pyowm.OWM('c56ba86f15e44e73a6e50e64c99b06df')
-        self.fc = owm.three_hours_forecast("Berkeley,us")
-        f = self.fc.get_forecast();
-        self.lst = f.get_weathers()[0:6]
-
-        #fixme this is doing for all five days
-        self.hot = self.fc.most_hot().get_temperature('fahrenheit')['temp']
-        self.ht = self.fc.most_hot().get_reference_time(timeformat='iso')
-
-        self.cold = self.fc.most_cold().get_temperature('fahrenheit')['temp']
-        self.ct = self.fc.most_cold().get_reference_time(timeformat='iso')
-
-        self.compose()
-
-    def compose(self): #fixme --> includes 5 days
-        msg = "Today, the high will be %sF around " \
-              "%s and the low will be %sF around %s.<br>" \
-              % (self.hot, self.ht, self.cold, self.ct)
-        if self.fc.will_have_rain():
-            r = self.fc.when_rain()[0];
-            msg += "It will also rain today around %s. Bring an umbrella!<br>" % r.get_reference_time(timeformat='iso')
         return msg
 
 
