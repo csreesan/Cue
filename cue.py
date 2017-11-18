@@ -2,9 +2,13 @@ import smtplib
 from WeatherMessage import WeatherMessage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+<<<<<<< Updated upstream
 from User import User
 
 CONTACT_DICT = dict(Jason='cue.me.today@gmail.com')
+=======
+from email.mime.image import MIMEImage
+>>>>>>> Stashed changes
 
 class cue:
     """ Actual cuer and takes in a list
@@ -37,7 +41,13 @@ class cue:
 
         text = "Hi!\nHow are you?\nHere is the link you wanted:\nhttps://www.python.org"
 
-        html = """\
+        html = 'hello <img src="cid:image1">'
+        fp = open('1.png', 'rb')
+        msgImage = MIMEImage(fp.read())
+        fp.close()
+        msgImage.add_header('Content-ID', '<image1>')
+
+        """\
         <html>
           <head>
           <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro" rel="stylesheet">
@@ -104,13 +114,23 @@ class cue:
                 </table>
             </body>
         </html>
+<<<<<<< HEAD
         """ % (self.weather_message.compose(), self.user.reminders.compose())
+=======
+<<<<<<< Updated upstream
+        """ % (self.weatherMessage.compose(), self.user.reminders.compose())
+=======
+        """ #% """"(Weather(self.name).compose(), reminders(self.name).compose())
+
+>>>>>>> Stashed changes
+>>>>>>> 6f44f69ae36c024d447a4cf47f0137ac780dce23
         print(html)
 
         part1 = MIMEText(text, 'plain')
         part2 = MIMEText(html, 'html')
         self.msg.attach(part1)
         self.msg.attach(part2)
+        self.msg.attach(msgImage)
 
         """
         if 'weather' in self.feats :
