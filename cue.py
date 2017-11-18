@@ -111,16 +111,7 @@ class cue:
                 </table>
             </body>
         </html>
-<<<<<<< HEAD
         """ % (self.weather_message.compose(), self.user.reminders.compose())
-=======
-<<<<<<< Updated upstream
-        """ % (self.weatherMessage.compose(), self.user.reminders.compose())
-=======
-        """ #% """"(Weather(self.name).compose(), reminders(self.name).compose())
-
->>>>>>> Stashed changes
->>>>>>> 6f44f69ae36c024d447a4cf47f0137ac780dce23
         print(html)
 
         part1 = MIMEText(text, 'plain')
