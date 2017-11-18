@@ -11,7 +11,7 @@ DAY_4 = 'day4'
 DAY_5 = 'day5'
 
 # Weather list index
-TODAY_END = 5
+TODAY_END = 4
 DAY_LIST_NUM = 8
 DAY_2_END = TODAY_END + DAY_LIST_NUM
 DAY_3_END = DAY_2_END + DAY_LIST_NUM
@@ -48,6 +48,7 @@ class Weather:
 
         self.forecast_reader = JsonForecastReader(city_name, country_code, unit)
         self.weather_list = self.forecast_reader.getWeatherList()
+        #print(self.weather_list[0])
         self.days_dict = self.get_days_dict()
         
     def get_days_dict(self):
@@ -115,6 +116,8 @@ class Day:
     def get_times_dict(self):
         times_dict = OrderedDict()
         for time_data_dict in self.day_data_list:
+            #print(self.get_data_time(time_data_dict))
+            #print(self.get_data_date(time_data_dict), 'vs', self.date)
             assert self.get_data_date(time_data_dict) == self.date, "Can't have different dates yo!"
             times_dict[self.get_data_time(time_data_dict)] = Time(time_data_dict)
         return times_dict
