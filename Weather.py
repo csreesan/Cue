@@ -1,9 +1,6 @@
 from ForecastReader import JsonForecastReader
 from collections import OrderedDict
 
-
-
-
 ##################################################
 # Static Variables
 # Day keys
@@ -14,7 +11,7 @@ DAY_4 = 'day4'
 DAY_5 = 'day5'
 
 # Weather list index
-TODAY_END = 4
+TODAY_END = 5
 DAY_LIST_NUM = 8
 DAY_2_END = TODAY_END + DAY_LIST_NUM
 DAY_3_END = DAY_2_END + DAY_LIST_NUM
@@ -47,143 +44,134 @@ class Weather:
     """ Class representing weather objects
     """
 
-    def __init__(self, cityName, countryCode="us", unit="imperial"):
+    def __init__(self, city_name, country_code="us", unit="imperial"):
 
-        self.forecastReader = JsonForecastReader(cityName, countryCode, unit)
-        self.weatherList = self.forecastReader.getWeatherList()
-        self.daysDict = self.getDaysDict()
-
-
-    def getDaysDict(self):
+        self.forecast_reader = JsonForecastReader(city_name, country_code, unit)
+        self.weather_list = self.forecast_reader.getWeatherList()
+        self.days_dict = self.get_days_dict()
+        
+    def get_days_dict(self):
         """ get days dict
         """
-        daysDict = OrderedDict()
-        daysDict[TODAY] = Day(self.weatherList[:TODAY_END])
-        daysDict[DAY_2] = Day(self.weatherList[TODAY_END:DAY_2_END])
-        daysDict[DAY_3] = Day(self.weatherList[DAY_2_END:DAY_3_END])
-        daysDict[DAY_4] = Day(self.weatherList[DAY_3_END:DAY_4_END])
-        daysDict[DAY_5] = Day(self.weatherList[DAY_4_END:DAY_5_END])
-        return daysDict
+        days_dict = OrderedDict()
+        days_dict[TODAY] = Day(self.weather_list[:TODAY_END])
+        days_dict[DAY_2] = Day(self.weather_list[TODAY_END:DAY_2_END])
+        days_dict[DAY_3] = Day(self.weather_list[DAY_2_END:DAY_3_END])
+        days_dict[DAY_4] = Day(self.weather_list[DAY_3_END:DAY_4_END])
+        days_dict[DAY_5] = Day(self.weather_list[DAY_4_END:DAY_5_END])
+        return days_dict
 
+    def get_day_from_string(self, day_string):
+        return self.days_dict[day_string]
 
-    def getDayFromString(self, dayString):
-        return self.daysDict[dayString]
+    def get_day_max_temp_and_time(self, day_string):
+        day = self.get_day_from_string(day_string)
+        return day.get_max_temp_and_time()
 
+    def get_day_min_temp_and_time(self, day_string):
+        day = self.get_day_from_string(day_string)
+        return day.get_min_temp_and_time()
 
-    def getDayMaxTempAndTime(self, dayString):
-        day = self.getDayFromString(dayString)
-        return day.getMaxTempAndTime()
+    def get_day_rain_description_and_time(self, day_string):
+        day = self.get_day_from_string(day_string)
+        return day.get_rain_description_and_time_tuple_list()
 
+    def get_time_weather_description(self, day_string, time_string):
+        day = self.get_day_from_string(day_string)
+        return day.get_time_object(time_string).get_weather_description()
 
-    def getDayMinTempAndTime(self, dayString):
-        day = self.getDayFromString(dayString)
-        return day.getMinTempAndTime()
+    def get_time_max_temp(self, day_string, time_string):
+        day = self.get_day_from_string(day_string)
+        return day.get_time_object(time_string).get_max_temp()
 
-
-    def getDayRainDesAndTime(self, dayString):
-        day = self.getDayFromString(dayString)
-        return day.getRainDesAndTimeTupleList()
-
-    def getSpecificWeatherDes(self, dayString, timeString):
-        day = self.getDayFromString(dayString)
-        return day.getTimeObject(timeString).getWeatherDes()
-
-    def getSpecificMaxTemp(self, day, time):
-        day = self.getDayFromString(dayString)
-        return day.getTimeObject(timeString).getMaxTemp()
-
-    def getSpecificMinTemp(self, dayString, time):
-        day = self.getDayFromString(dayString)
-        return day.getTimeObject(timeString).getMinTemp()
-
+    def get_time_min_temp(self, day_string, time_string):
+        day = self.get_day_from_string(day_string)
+        return day.get_time_object(time_string).get_min_temp()
 
 
 class Day:
-    """ Class represeting the Day
+    """ Class representing the Day
     """
 
-    def __init__(self, dayDataList):
-        self.date = self.getDataDate(dayDataList[0])
-        self.dayDataList = dayDataList
-        self.timesDict = self.getTimesDict()
+    def __init__(self, day_data_list):
+        self.date = self.get_data_date(day_data_list[0])
+        self.day_data_list = day_data_list
+        self.times_dict = self.get_times_dict()
 
-    def getDate(self):
+    def get_date(self):
         return self.date
 
+    def get_time_object(self, time):
+        return self.times_dict[time]
 
-    def getTimeObject(self, time):
-        return self.timesDict[time]
+    @staticmethod
+    def get_data_date(data_dict):
+        return data_dict.get(DATE_TIME_KEY)[0:10]
+    
+    @staticmethod
+    def get_data_time(data_dict):
+        return data_dict.get(DATE_TIME_KEY)[11:]
 
+    def get_times_dict(self):
+        times_dict = OrderedDict()
+        for time_data_dict in self.day_data_list:
+            assert self.get_data_date(time_data_dict) == self.date, "Can't have different dates yo!"
+            times_dict[self.get_data_time(time_data_dict)] = Time(time_data_dict)
+        return times_dict
 
-    def getDataDate(self, dataDict):
-        return dataDict.get(DATE_TIME_KEY)[0:10]
+    def get_max_temp_and_time(self):
+        max_temp = INIT_MAX_TEMP
+        max_temp_time = None
+        for time in self.times_dict.keys():
+            temp = self.get_time_object(time).get_temp()
+            if temp >= max_temp:
+                max_temp = temp
+                max_temp_time = time
 
-    def getDataTime(self, dataDict):
-        return dataDict.get(DATE_TIME_KEY)[11:]
+        return max_temp, max_temp_time
 
-    def getTimesDict(self):
-        timesDict = OrderedDict()
-        for timeDataDict in self.dayDataList:
-            assert self.getDataDate(timeDataDict) == self.date, "Can't have different dates yo!"
-            timesDict[self.getDataTime(timeDataDict)] = Time(timeDataDict)
-        return timesDict
+    def get_min_temp_and_time(self):
+        min_temp = INIT_MIN_TEMP
+        min_temp_time = None
+        for time in self.times_dict.keys():
+            temp = self.get_time_object(time).get_temp()
+            if temp <= min_temp:
+                min_temp = temp
+                min_temp_time = time
 
-    def getMaxTempAndTime(self):
-        maxTemp = INIT_MAX_TEMP
-        maxTempTime = None
-        for time in self.timesDict.keys():
-            temp = self.getTimeObject(time).getTemp()
-            if temp >= maxTemp:
-                maxTemp = temp
-                maxTempTime = time
+        return min_temp, min_temp_time
 
-        return maxTemp, maxTempTime
-
-
-    def getMinTempAndTime(self):
-        minTemp = INIT_MIN_TEMP
-        minTempTime = None
-        for time in self.timesDict.keys():
-            temp = self.getTimeObject(time).getTemp()
-            if temp <= minTemp:
-                minTemp = temp
-                minTempTime = time
-
-        return minTemp, minTempTime
-
-    def getRainDesAndTimeTupleList(self):
+    def get_rain_description_and_time_tuple_list(self):
         lst = []
-        for time in self.timesDict.keys():
-            weatherDes = self.getTimeObject(time).getWeatherDes()
-            if "rain" in weatherDes:
-                lst.append((weatherDes, time))
+        for time in self.times_dict.keys():
+            weather_des = self.get_time_object(time).get_weather_description()
+            if "rain" in weather_des:
+                lst.append((weather_des, time))
         return lst
-
-
 
 
 class Time:
     """ Class
     """
-    def __init__(self, timeDataDict):
-        self.timeDataDict = timeDataDict
-        self.time = self.getDataTime()
+    def __init__(self, time_data_dict):
+        self.time_data_dict = time_data_dict
+        self.time = self.get_data_time()
 
-    def getTime(self):
+    def get_time(self):
         return self.time
 
-    def getDataTime(self):
-        return self.timeDataDict.get(DATE_TIME_KEY)[11:]
+    def get_data_time(self):
+        return self.time_data_dict.get(DATE_TIME_KEY)[11:]
 
-    def getTemp(self):
-        return self.timeDataDict.get(MAIN_TEMP_KEY).get(TEMP_KEY)
+    def get_temp(self):
+        return self.time_data_dict.get(MAIN_TEMP_KEY).get(TEMP_KEY)
 
-    def getMaxTemp(self):
-        return self.timeDataDict.get(MAIN_TEMP_KEY).get(MAX_TEMP_KEY)
+    def get_max_temp(self):
+        return self.time_data_dict.get(MAIN_TEMP_KEY).get(MAX_TEMP_KEY)
 
-    def getMinTemp(self):
-        return self.timeDataDict.get(MAIN_TEMP_KEY).get(MIN_TEMP_KEY)
+    def get_min_temp(self):
+        return self.time_data_dict.get(MAIN_TEMP_KEY).get(MIN_TEMP_KEY)
 
-    def getWeatherDes(self):
-        return self.timeDataDict.get(WEATHER_KEY)[0].get(WEATHER_DESCRIPTION_KEY)
+    def get_weather_description(self):
+        return self.time_data_dict.get(WEATHER_KEY)[0].get(WEATHER_DESCRIPTION_KEY)
 

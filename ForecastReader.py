@@ -11,6 +11,7 @@ WEATHER_LIST_KEY = 'list'
 #####################################################
 # Class Definitions
 
+
 class JsonForecastReader:
 	""" Class that reads the 5-day forecast from OWM
 	"""

@@ -6,40 +6,36 @@ class WeatherMessage:
     """ Class that gives the weather report.
     """
 
-    def __init__(self, cityName, coutnryCode="us", unit="imperial"):
-        self.weather = Weather(cityName, coutnryCode, unit)	
+    def __init__(self, city_name, country_code="us", unit="imperial"):
+        self.weather = Weather(city_name, country_code, unit)	
 
-
-    def getHighTempAndTime(self):
+    def get_high_temp_and_time(self):
         """ Gets the highest temperature among the WEATHER_LIST
         """
-        return self.weather.getDayMaxTempAndTime(TODAY)
+        return self.weather.get_day_max_temp_and_time(TODAY)
 
-
-    def getLowTempAndTime(self):
+    def get_low_temp_and_time(self):
         """ Gets the lowest temperature among the WEATHER_LIST
         """
-        return self.weather.getDayMinTempAndTime(TODAY)
+        return self.weather.get_day_min_temp_and_time(TODAY)
 
-    def getRainAndTime(self):
+    def get_rain_and_time(self):
         """ Returns a list of tuple with rain status as keys and
             and raining time as values for the WEATHER_LIST
         """
-        return self.weather.getDayRainDesAndTime(TODAY)
+        return self.weather.get_day_rain_description_and_time(TODAY)
 
-
-
-    def compose(self): #fixme --> includes 5 days
+    def compose(self): ##fixme --> includes 5 days
         """ Composing a message to be sent to email.
         """
         msg = "\nToday, the high will be %sF around " \
               "%s and the low will be %sF around %s.\n" \
-              % (self.getHighTempAndTime()[0], self.getHighTempAndTime()[1],\
-                self.getLowTempAndTime()[0], self.getLowTempAndTime()[1])
-        if not self.getRainAndTime():
+              % (self.get_high_temp_and_time()[0], self.get_high_temp_and_time()[1],
+                 self.get_low_temp_and_time()[0], self.get_low_temp_and_time()[1])
+        if not self.get_rain_and_time():
             msg += "No rain today!"
         else:
-            for rainAndTimeTuple in self.getRainAndTime():
-                msg += "There will be %s, at around %s." % (rainAndTimeTuple[0],\
-                 rainAndTimeTuple[1])
+            for rainAndTimeTuple in self.get_rain_and_time():
+                msg += "There will be %s, at around %s." % (rainAndTimeTuple[0],
+                                                            rainAndTimeTuple[1])
         return msg

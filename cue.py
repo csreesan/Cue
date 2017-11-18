@@ -1,6 +1,5 @@
 import smtplib
 from WeatherMessage import WeatherMessage
-from Reminders import Reminders
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from User import User
@@ -24,7 +23,7 @@ class cue:
         self.msg = MIMEMultipart('alternative')
         self.msg['Subject'] = "Your upcoming day, %s!" % self.user.name
         self.msg['From'] = self.msg['To'] = user.email
-        self.weatherMessage = WeatherMessage(user.cityName, user.countryCode, user.unit)
+        self.weather_message = WeatherMessage(user.city_name, user.country_code, user.unit)
 
         # self.msg = "Dear %s," % name
         self.feats = user.feats
@@ -105,7 +104,7 @@ class cue:
                 </table>
             </body>
         </html>
-        """ % (self.weatherMessage.compose(), self.user.reminders.compose())
+        """ % (self.weather_message.compose(), self.user.reminders.compose())
         print(html)
 
         part1 = MIMEText(text, 'plain')
@@ -133,7 +132,6 @@ class cue:
         self.mailer.sendmail('cue.me.today@gmail.com',
                              CONTACT_DICT[self.name],
                              self.msg.as_string())
-
 
 
 def main():

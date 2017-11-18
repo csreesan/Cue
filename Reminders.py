@@ -1,15 +1,14 @@
 import openpyxl
 
 
-
 class Reminders:
     """ Reads from excel of tasks.
     """
 
-    def __init__(self, name, sheetName):
+    def __init__(self, name, sheet_name):
         self.name = name
-        self.sheetName = sheetName
-        self.wb = openpyxl.load_workbook('%s.xlsx' % self.sheetName)
+        self.sheet_name = sheet_name
+        self.wb = openpyxl.load_workbook('%s.xlsx' % self.sheet_name)
         self.sheet = self.wb.get_sheet_by_name('Sheet1')
         self.compose()
 
@@ -17,7 +16,7 @@ class Reminders:
         msg = ''
         i = 2
         task = self.sheet.cell(row=i, column=1).value
-        while task != None:  # due date should be adjusted in this
+        while task:  # due date should be adjusted in this
             due = self.sheet.cell(row=i, column=2).value
             msg += "%s due on %s<br>" % (task, due)
             i += 1
