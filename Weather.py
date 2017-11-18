@@ -11,7 +11,7 @@ DAY_4 = 'day4'
 DAY_5 = 'day5'
 
 # Weather list index
-TODAY_END = 4
+TODAY_END = 5
 DAY_LIST_NUM = 8
 DAY_2_END = TODAY_END + DAY_LIST_NUM
 DAY_3_END = DAY_2_END + DAY_LIST_NUM

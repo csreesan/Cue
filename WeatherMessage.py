@@ -35,7 +35,7 @@ class WeatherMessage:
         if not self.get_rain_and_time():
             msg += "No rain today!"
         else:
-            for rainAndTimeTuple in self.get_rain_and_time():
-                msg += "There will be %s, at around %s." % (rainAndTimeTuple[0],
-                                                            rainAndTimeTuple[1])
+            for rain_and_time in self.get_rain_and_time():
+                msg += "There will be %s, at around %s." % (rain_and_time[0],
+                                                            rain_and_time[1])
         return msg
