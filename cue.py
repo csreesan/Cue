@@ -2,13 +2,10 @@ import smtplib
 from WeatherMessage import WeatherMessage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-<<<<<<< Updated upstream
 from User import User
 
 CONTACT_DICT = dict(Jason='cue.me.today@gmail.com')
-=======
 from email.mime.image import MIMEImage
->>>>>>> Stashed changes
 
 class cue:
     """ Actual cuer and takes in a list
