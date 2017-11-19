@@ -28,10 +28,12 @@ class WeatherMessage:
     def compose(self): ##fixme --> includes 5 days
         """ Composing a message to be sent to email.
         """
-        msg = "\nToday, the high will be %sF around " \
-              "%s and the low will be %sF around %s.\n" \
-              % (self.get_high_temp_and_time()[0], self.get_high_temp_and_time()[1],
-                 self.get_low_temp_and_time()[0], self.get_low_temp_and_time()[1])
+        d = u'\N{DEGREE SIGN}'
+
+        msg = "\nToday, the high will be %s%sF around " \
+              "%s and the low will be %s%sF around %s.\n" \
+              % (self.get_high_temp_and_time()[0], d, self.get_high_temp_and_time()[1],
+                 self.get_low_temp_and_time()[0], d, self.get_low_temp_and_time()[1])
         if not self.get_rain_and_time():
             msg += "No rain today!"
         else:

@@ -1,16 +1,41 @@
+# -*- coding: utf-8 -*-
 import smtplib
+#from HtmlString import HtmlString
 from WeatherMessage import WeatherMessage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from User import User
+import datetime
+import email.mime.application
 
 CONTACT_DICT = dict(Jason='cue.me.today@gmail.com')
 from email.mime.image import MIMEImage
 
 class cue:
     """ Actual cuer and takes in a list
-        of desired items in email/
+        of desired items in email. Sends
+        the email, formatted.
     """
+    day_of_week = {0 : 'Monday',
+                   1 : 'Tuesday',
+                   2 : 'Wednesday',
+                   3 : 'Thursday',
+                   4 : 'Friday',
+                   5 : 'Saturday',
+                   6 : 'Sunday'}
+
+    months = {1 : 'January',
+              2 : "February",
+              3 : "March",
+              4 : "April",
+              5 : "May",
+              6 : "June",
+              7 : "July",
+              8 : "August",
+              9 : "September",
+              10 : "October",
+              11 : "November",
+              12 : "December"}
 
     def __init__(self, user):
         self.mailer = smtplib.SMTP('smtp.gmail.com', 587)
@@ -33,99 +58,47 @@ class cue:
 
     def composer(self):
         """ Creates the string used
-            to send the email.
+            to send the email and
+            creates html page if possible.
         """
+        added = []
+        for feat in self.feats:
+            if feat == 'task':
+                added.append(self.user.reminders.compose())
+            #add more features!
 
-        text = "Hi!\nHow are you?\nHere is the link you wanted:\nhttps://www.python.org"
-
-        html = 'hello <img src="cid:image1">'
-        fp = open('1.png', 'rb')
-        msgImage = MIMEImage(fp.read())
-        fp.close()
-        msgImage.add_header('Content-ID', '<image1>')
-
-        """\
-        <html>
-          <head>
-          <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro" rel="stylesheet">
-          </head>
-          <style>
-
-          h1 {
-            font-family: 'Source Sans Pro', sans-serif;
-          }
-
-          p {
-            font-family: 'Source Sans Pro', sans-serif;
-          }
-
-
-          </style>
-            <body style="margin: 0; padding: 0;">
-                <table align="center" border="1" bordercolor=BLACK cellpadding="50" cellspacing="0" width="600">
-                 <tr>
-                  <td bgcolor="#70bbd9">
-                   <h1>Good Morning, Jason!</h1>
-                   <p>Thursday, November 16, 2017.<br> Here's what's coming up today.</p>
-                  </td>
-                 </tr>
-                 <tr>
-                   <td bgcolor="#ffffff" style="padding: 40px 30px 40px 30px;">
-                    <table border="1" cellpadding="0" cellspacing="0" width="100%%">
-                     <tr>
-                      <td>
-                       %s
-                      </td>
-                     </tr>
-                     <tr>
-                      <td>
-                       %s
-                       <iframe src="https://calendar.google.com/calendar/embed?src=cue.me.today%%40gmail.com&ctz=America%%2FLos_Angeles" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>             </tr>
-                      </td>
-                     </tr>
-                     <tr>
-                      <td>
-                        <table border="1" cellpadding="0" cellspacing="0" width="100%%">
-                         <tr>
-                          <td width="50%%" valign="top">
-                           some sort of interaction
-                          </td>
-                          <td style="font-size: 0; line-height: 0;" width="0%%">
-                           &nbsp;
-                          </td>
-                          <td width="260" valign="top">
-                            some sort of interaction2
-                          </td>
-                         </tr>
-                        </table>
-                      </td>
-                     </tr>
-                    </table>
-                   </td>
-                 </tr>
-                 <tr>
-                  <td bgcolor="#ee4c50">
-                   <p>Have a good day and remember to bring your umbrella!</p>
-                  </td>
-                 </tr>
-                </table>
-            </body>
-        </html>
-        """ % (self.weather_message.compose(), self.user.reminders.compose())
-        print(html)
+        text = self.alt(added)
+        #html = HtmlString(self.name, added).compose()
 
         part1 = MIMEText(text, 'plain')
-        part2 = MIMEText(html, 'html')
+        #part2 = MIMEText(html, 'html')
         self.msg.attach(part1)
-        self.msg.attach(part2)
-        self.msg.attach(msgImage)
 
+        for file in self.user.reminders.get_attachments():
+            self.msg.attach(file)
+
+        #self.msg.attach(part2)
+        #self.msg.attach(msgImage)
+
+
+    def alt(self, added):
+        """ alternative email in case
+            html fails to send.
         """
-        if 'weather' in self.feats :
-            self.msg += weather(self.name).compose()
-        if 'task' in self.feats:
-            self.msg += task(self.name).compose()
-        """
+        wd = datetime.datetime.today().weekday()
+        month = datetime.date.today().month
+        day = datetime.date.today().day
+
+        msg = "Good Morning, %s" \
+              "\nToday is %s, %s %s." \
+              % (self.name, self.day_of_week[wd], self.months[month], day)
+        msg = msg + "\n" + self.weather_message.compose()
+
+        for add in added:
+            msg = msg + "\n" + add
+
+        return msg
+
 
     def mail(self):
         """ Sends the daily email notifiation
@@ -138,7 +111,7 @@ class cue:
         """
         print('sent')
         self.mailer.sendmail('cue.me.today@gmail.com',
-                             CONTACT_DICT[self.name],
+                             self.user.email,
                              self.msg.as_string())
 
 

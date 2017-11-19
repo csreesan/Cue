@@ -177,4 +177,3 @@ class Time:
 
     def get_weather_description(self):
         return self.time_data_dict.get(WEATHER_KEY)[0].get(WEATHER_DESCRIPTION_KEY)
-
