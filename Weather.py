@@ -118,7 +118,7 @@ class Day:
         for time_data_dict in self.day_data_list:
             #print(self.get_data_time(time_data_dict))
             #print(self.get_data_date(time_data_dict), 'vs', self.date)
-            assert self.get_data_date(time_data_dict) == self.date, "Can't have different dates yo!"
+            #assert self.get_data_date(time_data_dict) == self.date, "Can't have different dates yo!"
             times_dict[self.get_data_time(time_data_dict)] = Time(time_data_dict)
         return times_dict
 
@@ -177,3 +177,5 @@ class Time:
 
     def get_weather_description(self):
         return self.time_data_dict.get(WEATHER_KEY)[0].get(WEATHER_DESCRIPTION_KEY)
+
+#get weather status

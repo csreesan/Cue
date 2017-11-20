@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import smtplib
-#from HtmlString import HtmlString
+from HtmlString import HtmlString
 from WeatherMessage import WeatherMessage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -37,6 +37,13 @@ class cue:
               11 : "November",
               12 : "December"}
 
+    wd = datetime.datetime.today().weekday()
+    month = datetime.date.today().month
+    day = datetime.date.today().day
+
+    dt = "%s, %s %s" \
+              % (day_of_week[wd], months[month], day)
+
     def __init__(self, user):
         self.mailer = smtplib.SMTP('smtp.gmail.com', 587)
         self.mailer.ehlo()
@@ -51,7 +58,6 @@ class cue:
         self.msg['From'] = self.msg['To'] = user.email
         self.weather_message = WeatherMessage(user.city_name, user.country_code, user.unit)
 
-        # self.msg = "Dear %s," % name
         self.feats = user.feats
 
         self.composer()
@@ -68,30 +74,30 @@ class cue:
             #add more features!
 
         text = self.alt(added)
-        #html = HtmlString(self.name, added).compose()
+        htmlObj = HtmlString(self.name, added, self.dt, self.weather_message.compose())
+        src = htmlObj.composeText()
+        msgImage = htmlObj.composeImage()
 
         part1 = MIMEText(text, 'plain')
-        #part2 = MIMEText(html, 'html')
+        part2 = MIMEText(src, 'html')
+
         self.msg.attach(part1)
+        self.msg.attach(msgImage)
 
         for file in self.user.reminders.get_attachments():
             self.msg.attach(file)
 
-        #self.msg.attach(part2)
-        #self.msg.attach(msgImage)
+        self.msg.attach(part2)
+
 
 
     def alt(self, added):
         """ alternative email in case
             html fails to send.
         """
-        wd = datetime.datetime.today().weekday()
-        month = datetime.date.today().month
-        day = datetime.date.today().day
-
         msg = "Good Morning, %s" \
-              "\nToday is %s, %s %s." \
-              % (self.name, self.day_of_week[wd], self.months[month], day)
+              "\nToday is %s." \
+              % (self.name, self.dt)
         msg = msg + "\n" + self.weather_message.compose()
 
         for add in added:

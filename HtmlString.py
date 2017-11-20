@@ -1,5 +1,3 @@
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 import datetime
 
@@ -8,88 +6,67 @@ class HtmlString:
     month = datetime.date.month
     day = datetime.date.day
 
-    html = """\
-        <html>
-          <head>
-          <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro" rel="stylesheet">
-          </head>
-          <style>
+    html = """
+            <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+  <head>
+    <link href="https://fonts.googleapis.com/css?family=Yantramanav:400,900" rel="stylesheet">   
+  </head>
+  <body style="margin: 0; padding: 0;">
+    <table align="center" style="border-spacing:10px;border-collapse:separate;text-align:left;width:600px;margin:auto;">
+      <tr>
+        <td style="padding:10px;">
+          <i>cue: your daily digest</i>
+          <h1 style="padding:0px;margin:0px;font-family:'Yantramanav', sans-serif;">Good Morning, %s.</h1>
+          <p style="padding:0px;margin:0px;font-family:'Yantramanav', sans-serif;">%s.<br>
+             Here's some things to get you ready for the day.</p>
+          <hr style="border-color:black;">
+        </td>
+      </tr>
+      <tr>
+        <td bgcolor="#ffffff" style="padding:10px;">
+          <h2 style="padding:0px;margin:0px;font-family:'Yantramanav', sans-serif;">Weather</h2>
+          <img src="cid:image1" style="width:auto;max-width:150px;height:auto;max-height:100px;">
+          <p style="padding:0px;margin:0px;font-family:'Yantramanav', sans-serif;">%s</p>
+        </td>
+      </tr>
+      <tr>
+        <td bgcolor="#ffffff" style="padding:10px;">
+          <h2 style="padding:0px;margin:0px;font-family:'Yantramanav', sans-serif;">Tasks</h2>
+          <p style="padding:0px;margin:0px;font-family:'Yantramanav', sans-serif;">%s</p>
+        </td>
+      </tr>
+      <tr>
+        <td bgcolor="#ffffff" style="padding:10px;">
+          <h2 style="padding:0px;margin:0px;font-family:'Yantramanav', sans-serif;">Reminders</h2>
+          <p style="padding:0px;margin:0px;font-family:'Yantramanav', sans-serif;">Remember to ...</p>
+        </td>
+      </tr>
+      <tr>
+        <td bgcolor="#2ecc71" style="padding:10px;">
+          <p1 style="display:block;padding:0px;margin:0px;font-family:'Yantramanav', sans-serif;color:white;text-align:center;"><center>That's all. Enjoy your day!</center></p1>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
+            """
 
-          h1 {
-            font-family: 'Source Sans Pro', sans-serif;
-          }
-
-          p {
-            font-family: 'Source Sans Pro', sans-serif;
-          }
-
-
-          </style>
-            <body style="margin: 0; padding: 0;">
-                <table align="center" border="1" bordercolor=BLACK cellpadding="50" cellspacing="0" width="600">
-                 <tr>
-                  <td bgcolor="#70bbd9">
-                   <h1>Good Morning, Jason!</h1>
-                   <p>Thursday, November 16, 2017.<br> Here's what's coming up today.</p>
-                  </td>
-                 </tr>
-                 <tr>
-                   <td bgcolor="#ffffff" style="padding: 40px 30px 40px 30px;">
-                    <table border="1" cellpadding="0" cellspacing="0" width="100%%">
-                     <tr>
-                      <td>
-                       %s
-                      </td>
-                     </tr>
-                     <tr>
-                      <td>
-                       %s
-                      </td>
-                     </tr>
-                     <tr>
-                      <td>
-                        <table border="1" cellpadding="0" cellspacing="0" width="100%%">
-                         <tr>
-                          <td width="50%%" valign="top">
-                           some sort of interaction
-                          </td>
-                          <td style="font-size: 0; line-height: 0;" width="0%%">
-                           &nbsp;
-                          </td>
-                          <td width="260" valign="top">
-                            some sort of interaction2
-                          </td>
-                         </tr>
-                        </table>
-                      </td>
-                     </tr>
-                    </table>
-                   </td>
-                 </tr>
-                 <tr>
-                  <td bgcolor="#ee4c50">
-                   <p>Have a good day and remember to bring your umbrella!</p>
-                  </td>
-                 </tr>
-                </table>
-            </body>
-        </html>
-        """
-
-    def __init__(self, name, added):
+    def __init__(self, name, added, date, w):
+        self.name = name
+        self.date = date
         self.added = added
-
-    def compose(self):
-
+        self.w = w
 
 
-    """html code as string format"""
+    def composeText(self):
+        msg = self.html % (self.name, self.date, self.w ,self.added[0])
+        return msg
 
-html = 'hello <img src="cid:image1">'
+    def composeImage(self):
         fp = open('1.png', 'rb')
         msgImage = MIMEImage(fp.read())
         fp.close()
         msgImage.add_header('Content-ID', '<image1>')
+        return msgImage
 
-     % (self.weather_message.compose(), self.user.reminders.compose())
-        print(html)

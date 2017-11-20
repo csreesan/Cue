@@ -21,7 +21,7 @@ class Reminders:
             msg += "%s due on %s<br>" % (task, due)
             if self.sheet.cell(row=i, column=3).value != None:
                 cell = self.sheet.cell(row=i, column=3).value
-                msg += "Attached is %s." % cell
+                msg += "Attached is %s.<br>" % cell
                 self.attach(cell)
             i += 1
             task = self.sheet.cell(row=i, column=1).value
