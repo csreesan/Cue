@@ -118,7 +118,7 @@ class Day:
         for time_data_dict in self.day_data_list:
             #print(self.get_data_time(time_data_dict))
             #print(self.get_data_date(time_data_dict), 'vs', self.date)
-            #assert self.get_data_date(time_data_dict) == self.date, "Can't have different dates yo!"
+            assert self.get_data_date(time_data_dict) == self.date, "Can't have different dates yo!"
             times_dict[self.get_data_time(time_data_dict)] = Time(time_data_dict)
         return times_dict
 
